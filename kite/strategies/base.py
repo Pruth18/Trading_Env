@@ -410,12 +410,13 @@ class Strategy(ABC):
                     equity += position_value
         
         # Add to equity curve
-        self.equity_curve = self.equity_curve.append({
+        new_row = pd.DataFrame([{
             "timestamp": datetime.now(),
             "equity": equity,
             "cash": self.portfolio.cash,
             "holdings": holdings
-        }, ignore_index=True)
+        }])
+        self.equity_curve = pd.concat([self.equity_curve, new_row], ignore_index=True)
     
     def run(self, data: Optional[Dict[str, pd.DataFrame]] = None) -> Dict[str, Any]:
         """

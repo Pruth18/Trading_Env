@@ -46,14 +46,17 @@ def setup_logger(
         log_filename += f"_{backtest_id}"
     
     # Add file handler with rotation
-    log_file = LOGS_DIR / f"{log_filename}_{datetime.now().strftime('%Y%m%d')}.log"
+    log_path = LOGS_DIR / f"{log_filename}_{datetime.now().strftime('%Y%m%d')}.log"
     logger.add(
-        log_file,
+        log_path,
         format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
         level=level,
-        rotation="10 MB",
-        retention="30 days",
+        rotation="10 MB",    # Rotate when file reaches 10 MB
+        retention="30 days", # Keep logs for 30 days
+        compression="zip"    # Compress rotated logs
     )
+    
+    logger.info(f"Logger initialized: {log_path}")
 
 
 def get_strategy_logger(strategy_name: str) -> logger:

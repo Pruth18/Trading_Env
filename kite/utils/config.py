@@ -24,11 +24,32 @@ for directory in [DATA_DIR, LOGS_DIR, CONFIG_DIR]:
 
 # Angel One API configuration
 ANGEL_API_CONFIG = {
-    "api_key": os.getenv("ANGEL_API_KEY", ""),
-    "client_id": os.getenv("ANGEL_CLIENT_ID", ""),
-    "password": os.getenv("ANGEL_PASSWORD", ""),
-    "totp_key": os.getenv("ANGEL_TOTP_KEY", ""),
+    # Common credentials
+    "client_id": os.getenv("ANGEL_CLIENT_ID", "YOUR_CLIENT_ID"),  # Replace with your actual client ID
+    "password": os.getenv("ANGEL_PASSWORD", "YOUR_PASSWORD"),  # Replace with your actual password
+    "totp_key": os.getenv("ANGEL_TOTP_KEY", "YOUR_TOTP_KEY"),  # Replace with your actual TOTP key
     "api_base_url": os.getenv("ANGEL_API_URL", "https://apiconnect.angelbroking.com"),
+    
+    # Trading API credentials
+    "trading": {
+        "api_key": os.getenv("ANGEL_TRADING_API_KEY", "ZNQY5zne"),
+        "secret_key": os.getenv("ANGEL_TRADING_SECRET_KEY", "aad2fa65-641a-42e2-84d7-842aafbf6f64"),
+        "app_name": "MyTradingApi"
+    },
+    
+    # Historical Data API credentials
+    "historical": {
+        "api_key": os.getenv("ANGEL_HISTORICAL_API_KEY", "10XN79Ba"),
+        "secret_key": os.getenv("ANGEL_HISTORICAL_SECRET_KEY", "28abda57-e57f-4340-8809-f6124d2d8a53"),
+        "app_name": "MyHistoricalApi"
+    },
+    
+    # Market Feeds API credentials
+    "market": {
+        "api_key": os.getenv("ANGEL_MARKET_API_KEY", "nf3HXMX1"),
+        "secret_key": os.getenv("ANGEL_MARKET_SECRET_KEY", "ca906d28-bd5f-452c-acb8-2177b3ef3d72"),
+        "app_name": "MyMarketApi"
+    }
 }
 
 # Database configuration

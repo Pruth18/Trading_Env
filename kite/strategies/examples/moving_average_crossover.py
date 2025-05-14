@@ -100,10 +100,11 @@ class MovingAverageCrossoverStrategy(Strategy):
             latest = df.iloc[-1]
             prev = df.iloc[-2] if len(df) > 1 else None
             
-            # Determine action based on crossover
+            # Determine action based on multiple conditions
             action = None
             quantity = 0
             
+            # 1. Traditional crossover signals
             if prev is not None and latest["crossover"]:
                 if latest["signal"] == 1:  # Bullish crossover
                     action = "BUY"
@@ -112,7 +113,7 @@ class MovingAverageCrossoverStrategy(Strategy):
                     portfolio_value = self.portfolio.equity
                     quantity = int((portfolio_value * position_size) / price)
                     
-                    self.logger.info(f"BUY signal for {symbol} at {price:.2f}")
+                    self.logger.info(f"BUY signal (crossover) for {symbol} at {price:.2f}")
                 
                 elif latest["signal"] == -1:  # Bearish crossover
                     action = "SELL"
@@ -122,7 +123,45 @@ class MovingAverageCrossoverStrategy(Strategy):
                         if position.side == PositionSide.LONG and position.quantity > 0:
                             quantity = position.quantity
                             
-                            self.logger.info(f"SELL signal for {symbol} at {latest['close']:.2f}")
+                            self.logger.info(f"SELL signal (crossover) for {symbol} at {latest['close']:.2f}")
+            
+            # 2. Trend following signals
+            elif latest["fast_ma"] > latest["slow_ma"] and latest["histogram"] > 0:
+                # Strong uptrend - buy if we don't have a position
+                if symbol not in self.positions or self.positions[symbol].side == PositionSide.FLAT or self.positions[symbol].quantity == 0:
+                    action = "BUY"
+                    price = latest["close"]
+                    portfolio_value = self.portfolio.equity
+                    quantity = int((portfolio_value * position_size * 0.75) / price)  # 75% position size for trend following
+                    
+                    self.logger.info(f"BUY signal (trend following) for {symbol} at {price:.2f}")
+            
+            elif latest["fast_ma"] < latest["slow_ma"] and latest["histogram"] < 0:
+                # Strong downtrend - sell if we have a position
+                if symbol in self.positions and self.positions[symbol].side == PositionSide.LONG and self.positions[symbol].quantity > 0:
+                    action = "SELL"
+                    quantity = self.positions[symbol].quantity
+                    
+                    self.logger.info(f"SELL signal (trend following) for {symbol} at {latest['close']:.2f}")
+            
+            # 3. Momentum signals
+            elif prev is not None and latest["histogram"] > prev["histogram"] and latest["histogram"] > 0:
+                # Increasing positive momentum - buy if we don't have a position
+                if symbol not in self.positions or self.positions[symbol].side == PositionSide.FLAT or self.positions[symbol].quantity == 0:
+                    action = "BUY"
+                    price = latest["close"]
+                    portfolio_value = self.portfolio.equity
+                    quantity = int((portfolio_value * position_size * 0.5) / price)  # 50% position size for momentum
+                    
+                    self.logger.info(f"BUY signal (momentum) for {symbol} at {price:.2f}")
+            
+            elif prev is not None and latest["histogram"] < prev["histogram"] and latest["histogram"] < 0:
+                # Increasing negative momentum - sell if we have a position
+                if symbol in self.positions and self.positions[symbol].side == PositionSide.LONG and self.positions[symbol].quantity > 0:
+                    action = "SELL"
+                    quantity = self.positions[symbol].quantity
+                    
+                    self.logger.info(f"SELL signal (momentum) for {symbol} at {latest['close']:.2f}")
             
             # Create signal dictionary
             signals[symbol] = {
